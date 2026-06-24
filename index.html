@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>45-Day SAT Study Tracker</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --text: #172033;
+      --muted: #6b7280;
+      --line: #e5e7eb;
+      --blue: #2563eb;
+      --blue-soft: #dbeafe;
+      --green: #16a34a;
+      --green-soft: #dcfce7;
+      --yellow: #ca8a04;
+      --yellow-soft: #fef9c3;
+      --red: #dc2626;
+      --red-soft: #fee2e2;
+      --purple: #7c3aed;
+      --purple-soft: #ede9fe;
+      --gray-soft: #f3f4f6;
+      --shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top left, #e0f2fe, transparent 35%), var(--bg);
+      color: var(--text);
+    }
+
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 24px;
+      background: rgba(255,255,255,0.86);
+      backdrop-filter: blur(14px);
+      border-right: 1px solid var(--line);
+      overflow-y: auto;
+    }
+
+    .brand {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .logo {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      color: white;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      box-shadow: var(--shadow);
+    }
+
+    .brand h1 { font-size: 18px; margin: 0; line-height: 1.15; }
+    .brand p { font-size: 12px; color: var(--muted); margin: 3px 0 0; }
+
+    .nav { display: grid; gap: 8px; }
+    .nav button {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      border: 0;
+      background: transparent;
+      color: #334155;
+      padding: 12px 14px;
+      border-radius: 12px;
+      text-align: left;
+      transition: 0.18s ease;
+      font-weight: 650;
+    }
+    .nav button:hover { background: var(--gray-soft); transform: translateX(2px); }
+    .nav button.active { background: var(--blue); color: white; box-shadow: 0 10px 22px rgba(37,99,235,.22); }
+
+    .side-card {
+      margin-top: 24px;
+      padding: 16px;
+      border-radius: var(--radius);
+      background: linear-gradient(135deg, #eff6ff, #f5f3ff);
+      border: 1px solid #dbeafe;
+    }
+    .side-card h3 { margin: 0 0 8px; font-size: 14px; }
+    .side-card p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.45; }
+
+    .main {
+      padding: 26px;
+      overflow: hidden;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+    .topbar h2 { margin: 0; font-size: 28px; letter-spacing: -0.03em; }
+    .topbar p { margin: 5px 0 0; color: var(--muted); }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--line);
+      background: var(--card);
+      padding: 10px 14px;
+      border-radius: 999px;
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .grid { display: grid; gap: 16px; }
+    .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+    .card {
+      background: rgba(255,255,255,.92);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+
+    .stat-card {
+      min-height: 122px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .stat-label { color: var(--muted); font-size: 13px; font-weight: 700; }
+    .stat-value { font-size: 30px; font-weight: 900; letter-spacing: -0.04em; margin-top: 8px; }
+    .stat-sub { color: var(--muted); font-size: 12px; margin-top: 4px; }
+
+    .progress-wrap { margin-top: 12px; }
+    .progress-top { display:flex; justify-content:space-between; font-size:12px; color:var(--muted); margin-bottom:7px; font-weight:700; }
+    .progress-track {
+      height: 10px;
+      border-radius: 999px;
+      background: #e5e7eb;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--blue), var(--purple));
+      width: 0%;
+      transition: width .25s ease;
+    }
+
+    .section { display: none; animation: fade .18s ease; }
+    .section.active { display: block; }
+    @keyframes fade { from { opacity: 0; transform: translateY(5px);} to { opacity: 1; transform: translateY(0);} }
+
+    .section-head {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:16px;
+      margin: 18px 0 14px;
+    }
+    .section-head h3 { margin:0; font-size:20px; letter-spacing:-.02em; }
+    .section-head p { margin:4px 0 0; color:var(--muted); font-size:13px; }
+
+    .btn {
+      border: 0;
+      background: var(--blue);
+      color: white;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-weight: 800;
+      box-shadow: 0 10px 20px rgba(37,99,235,.2);
+      transition: .15s ease;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn.secondary { background: white; color: var(--text); border: 1px solid var(--line); box-shadow: none; }
+    .btn.danger { background: var(--red); }
+    .btn.small { padding: 7px 10px; border-radius: 10px; font-size: 12px; }
+
+    .daily-card {
+      display: grid;
+      grid-template-columns: 150px 1fr 1fr 260px;
+      gap: 14px;
+      align-items: stretch;
+    }
+    .day-box {
+      background: linear-gradient(135deg, var(--blue-soft), #f5f3ff);
+      border-radius: 16px;
+      padding: 15px;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      border: 1px solid #bfdbfe;
+    }
+    .day-number { font-size: 28px; font-weight: 950; }
+    .date { color: var(--muted); font-size: 13px; font-weight: 750; }
+    .topic-card { border: 1px solid var(--line); border-radius: 16px; padding: 14px; background:#fff; }
+    .topic-card h4 { margin:0 0 8px; font-size:15px; }
+    .topic-card p { margin:6px 0; color:var(--muted); line-height:1.35; font-size:13px; }
+
+    .checklist { display:grid; gap:9px; }
+    label.check {
+      display:flex;
+      align-items:center;
+      gap:8px;
+      font-size:13px;
+      color:#334155;
+      font-weight:700;
+    }
+    input[type="checkbox"] { width:17px; height:17px; accent-color: var(--blue); }
+
+    select, input, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px 12px;
+      background: white;
+      color: var(--text);
+      outline: none;
+    }
+    textarea { min-height: 78px; resize: vertical; line-height:1.35; }
+    select:focus, input:focus, textarea:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,.12); }
+
+    .filters { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin: 0 0 14px; }
+    .filters input { max-width: 320px; }
+    .filters select { max-width: 210px; }
+
+    .calendar-grid {
+      display:grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .cal-card {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+      background: white;
+      min-height: 120px;
+      transition: .15s ease;
+      cursor:pointer;
+    }
+    .cal-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+    .cal-date { font-weight: 900; font-size: 14px; }
+    .cal-day { color: var(--muted); font-size: 12px; margin-top:2px; }
+    .cal-topic { font-size: 12px; margin-top: 10px; line-height:1.25; color:#334155; }
+    .badge {
+      display:inline-flex;
+      align-items:center;
+      border-radius:999px;
+      padding: 4px 8px;
+      font-size:11px;
+      font-weight:900;
+      margin-top:10px;
+    }
+    .status-not { background:var(--gray-soft); color:#475569; }
+    .status-learning { background:var(--blue-soft); color:#1d4ed8; }
+    .status-review { background:var(--yellow-soft); color:#854d0e; }
+    .status-almost { background:var(--purple-soft); color:#6d28d9; }
+    .status-mastered { background:var(--green-soft); color:#166534; }
+    .status-missed { background:var(--red-soft); color:#991b1b; }
+
+    .skill-grid {
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .skill-card {
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: white;
+      display:grid;
+      gap:10px;
+    }
+    .skill-card strong { font-size: 14px; }
+
+    .mock-grid { display:grid; gap:16px; }
+    .mock-card { display:grid; grid-template-columns: 180px 1fr; gap: 14px; }
+    .score-grid { display:grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap:10px; }
+    .note-grid { display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:10px; margin-top:10px; }
+
+    table { width:100%; border-collapse: collapse; }
+    th, td { text-align:left; padding: 10px; border-bottom: 1px solid var(--line); vertical-align:top; }
+    th { font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; }
+    td input, td select, td textarea { min-width: 140px; }
+    .table-wrap { overflow:auto; border:1px solid var(--line); border-radius:16px; background:white; }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15,23,42,.45);
+      display:none;
+      place-items:center;
+      padding: 18px;
+      z-index: 30;
+    }
+    .modal-backdrop.active { display:grid; }
+    .modal {
+      max-width: 900px;
+      width:100%;
+      max-height: 88vh;
+      overflow:auto;
+      background:white;
+      border-radius: 22px;
+      box-shadow: 0 30px 80px rgba(0,0,0,.22);
+      padding: 20px;
+    }
+    .modal-head { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom: 12px; }
+    .modal-head h3 { margin:0; }
+
+    .empty { color:var(--muted); text-align:center; padding: 24px; }
+    .today-highlight { outline: 3px solid rgba(37,99,235,.22); }
+
+    @media (max-width: 1100px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar { position: relative; height:auto; border-right:0; border-bottom:1px solid var(--line); }
+      .nav { grid-template-columns: repeat(4, 1fr); }
+      .daily-card { grid-template-columns: 1fr; }
+      .grid-4, .grid-3, .grid-2, .skill-grid { grid-template-columns: 1fr 1fr; }
+      .calendar-grid { grid-template-columns: repeat(3, 1fr); }
+      .mock-card { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 720px) {
+      .main { padding: 16px; }
+      .topbar { flex-direction: column; align-items:flex-start; }
+      .nav { grid-template-columns: 1fr 1fr; }
+      .grid-4, .grid-3, .grid-2, .skill-grid, .score-grid, .note-grid, .calendar-grid { grid-template-columns: 1fr; }
+      .sidebar { padding: 16px; }
+    }
+
+    @media print {
+      .sidebar, .topbar .pill, .filters, .btn { display:none !important; }
+      .app { display:block; }
+      .main { padding:0; }
+      .card { box-shadow:none; break-inside:avoid; }
+      body { background:white; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo">SAT</div>
+        <div>
+          <h1>45-Day SAT Tracker</h1>
+          <p>June 25 → August 8, 2026</p>
+        </div>
+      </div>
+      <nav class="nav" id="nav"></nav>
+      <div class="side-card">
+        <h3>Daily target</h3>
+        <p>2 hours Math + 2 hours Reading/Writing. Mark each section done, review mistakes, then update the skill status.</p>
+      </div>
+      <div class="side-card">
+        <h3>Smart rule</h3>
+        <p>Any skill marked “Needs Review” should be practiced again before the next mock test.</p>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <div>
+          <h2 id="pageTitle">Dashboard</h2>
+          <p id="pageSub">Track every day, every skill, and every mock score.</p>
+        </div>
+        <div class="pill" id="countdownPill">Loading...</div>
+      </div>
+
+      <section id="dashboard" class="section active"></section>
+      <section id="daily" class="section"></section>
+      <section id="calendar" class="section"></section>
+      <section id="math" class="section"></section>
+      <section id="english" class="section"></section>
+      <section id="mocks" class="section"></section>
+      <section id="mistakes" class="section"></section>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal">
+      <div class="modal-head">
+        <h3 id="modalTitle">Day Details</h3>
+        <button class="btn secondary" onclick="closeModal()">Close</button>
+      </div>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+<script>
+const START_DATE = new Date('2026-06-25T00:00:00');
+const END_DATE = new Date('2026-08-08T00:00:00');
+const STORAGE_KEY = 'sat45Tracker.v1';
+const STATUS_OPTIONS = ['Not Started','Learning','Needs Review','Almost Mastered','Mastered'];
+const STATUS_CLASS = {
+  'Not Started': 'status-not',
+  'Learning': 'status-learning',
+  'Needs Review': 'status-review',
+  'Almost Mastered': 'status-almost',
+  'Mastered': 'status-mastered'
+};
+
+const tabs = [
+  ['dashboard','📊','Dashboard','Big overview of your SAT progress'],
+  ['daily','✅','Daily Plan','Track Math and English every day'],
+  ['calendar','📅','Calendar','45-day calendar view'],
+  ['math','🧮','Math Skills','Mastery tracker for SAT Math'],
+  ['english','📖','English Skills','Mastery tracker for SAT Reading/Writing'],
+  ['mocks','🎯','Mock Tests','Weekly score and improvement tracker'],
+  ['mistakes','🧠','Mistake Log','Write every mistake and fix the pattern']
+];
+
+const plan = [
+  ['Diagnostic + Setup','Take SAT Math diagnostic and create mistake log.','60 min diagnostic + 45 min review + 15 min weak topic list','Diagnostic + Setup','Take SAT Reading/Writing diagnostic and create mistake log.','60 min diagnostic + 45 min review + 15 min weak topic list'],
+  ['Number Basics','Fractions, decimals, percents, conversions.','25 min learn + 75 min SAT practice + 20 min mistakes','Main Idea + Details','Central idea, details, supporting evidence.','25 min learn + 75 min practice + 20 min mistakes'],
+  ['Percents + Ratios','Percent change, discounts, tax, ratios, rates.','25 min review + 75 min word problems + 20 min mistakes','Inferences','Choose answers supported by the passage.','25 min learn + 75 min practice + 20 min mistakes'],
+  ['Units + Proportions','Conversions, speed, density, scale, proportions.','25 min learn + 75 min mixed practice + 20 min review','Words in Context','Vocab based on sentence and passage meaning.','25 min learn + 75 min practice + 20 min review'],
+  ['Exponents + Roots','Exponent rules, radicals, scientific notation.','25 min learn + 75 min practice + 20 min mistakes','Text Structure + Purpose','Author purpose and sentence function.','25 min learn + 75 min practice + 20 min mistakes'],
+  ['Linear Equations','Solve for x, variables both sides, distribution.','25 min learn + 80 min drill + 15 min mistakes','Command of Evidence','Find evidence that best supports a claim.','25 min learn + 80 min practice + 15 min mistakes'],
+  ['Linear Word Problems','Turn words into equations.','25 min examples + 80 min practice + 15 min review','Transitions','Logical transition words and relationships.','25 min learn + 80 min practice + 15 min review'],
+  ['Slope + Lines','Slope, y-intercept, x-intercept, line graphs.','25 min learn + 80 min practice + 15 min mistakes','Boundaries','Commas, semicolons, colons, periods.','25 min learn + 80 min practice + 15 min mistakes'],
+  ['Line Equations','y=mx+b, standard form, point-slope.','25 min learn + 80 min equations + 15 min review','Subject-Verb Agreement','Singular/plural verbs and tricky subjects.','25 min learn + 80 min practice + 15 min review'],
+  ['Graphing Lines','Intercepts, parallel lines, perpendicular lines.','25 min learn + 80 min graph practice + 15 min mistakes','Verb Tense','Consistent tense and correct verb form.','25 min learn + 80 min practice + 15 min mistakes'],
+  ['Inequalities','Linear inequalities and word problems.','25 min learn + 80 min practice + 15 min review','Pronouns','Pronoun agreement and clear references.','25 min learn + 80 min practice + 15 min review'],
+  ['Systems of Equations','Substitution, elimination, graphing.','25 min learn + 80 min practice + 15 min mistakes','Modifiers','Misplaced and dangling modifiers.','25 min learn + 80 min practice + 15 min mistakes'],
+  ['Systems Word Problems','Price, mixture, rate, comparison problems.','25 min examples + 80 min practice + 15 min review','Sentence Placement','Where a sentence best fits in a passage.','25 min learn + 80 min practice + 15 min review'],
+  ['No/Infinite Solutions','Parallel lines, same equation, constants.','25 min learn + 80 min practice + 15 min mistakes','Rhetorical Synthesis','Use bullet notes to answer a question.','25 min learn + 80 min practice + 15 min mistakes'],
+  ['Algebra Review','Lines, systems, inequalities, word problems.','20 min review + 80 min mixed practice + 20 min mistakes','Cross-Text Connections','Compare two short passages.','25 min learn + 75 min practice + 20 min mistakes'],
+  ['Functions Basics','f(x), input/output, evaluating functions.','25 min learn + 80 min practice + 15 min review','Grammar Review 1','Punctuation and sentence boundaries.','20 min review + 80 min mixed practice + 20 min mistakes'],
+  ['Function Graphs','Domain, range, interpreting graph meaning.','25 min learn + 80 min practice + 15 min mistakes','Reading Review 1','Main idea, inference, evidence.','20 min review + 80 min mixed practice + 20 min mistakes'],
+  ['Rearranging Formulas','Solve for any variable.','25 min learn + 80 min practice + 15 min review','Expression of Ideas','Make writing clearer and more logical.','25 min learn + 80 min practice + 15 min review'],
+  ['Factoring Basics','GCF, trinomials, difference of squares.','25 min learn + 80 min practice + 15 min mistakes','Concision','Remove extra words and redundancy.','25 min learn + 80 min practice + 15 min mistakes'],
+  ['Quadratics Intro','Parabolas, roots, intercepts.','25 min learn + 80 min practice + 15 min review','Parallel Structure','Match grammar patterns.','25 min learn + 80 min practice + 15 min review'],
+  ['Solving Quadratics','Factoring, square roots, quadratic formula.','25 min learn + 80 min practice + 15 min mistakes','Hard Reading Passages','Timed hard passage questions.','20 min strategy + 80 min timed practice + 20 min review'],
+  ['Vertex Form','Vertex, max/min, graph meaning.','25 min learn + 80 min practice + 15 min review','Grammar Review 2','Agreement, verbs, pronouns, modifiers.','20 min review + 80 min mixed practice + 20 min mistakes'],
+  ['Completing the Square','Convert quadratic forms.','25 min learn + 80 min practice + 15 min mistakes','Transitions Review','Cause/effect, contrast, continuation.','20 min review + 80 min practice + 20 min mistakes'],
+  ['Quadratic Word Problems','Area, projectile, revenue problems.','25 min examples + 80 min practice + 15 min review','Rhetorical Synthesis Review','Note-based questions and goal-based answers.','20 min review + 80 min practice + 20 min mistakes'],
+  ['Exponential Functions','Growth, decay, percent growth.','25 min learn + 80 min practice + 15 min mistakes','Graph/Table Evidence','Read data in English questions.','25 min learn + 80 min practice + 15 min review'],
+  ['Polynomials','Add, multiply, factor, graph meaning.','25 min learn + 80 min practice + 15 min review','Standard English Review','Grammar mixed sets.','20 min review + 80 min practice + 20 min mistakes'],
+  ['Rational Expressions','Variable fractions, restrictions, equations.','25 min learn + 80 min practice + 15 min mistakes','Craft + Structure Review','Words in context and author purpose.','20 min review + 80 min practice + 20 min mistakes'],
+  ['Radicals + Absolute Value','Square root equations and absolute value equations.','25 min learn + 80 min practice + 15 min review','Information + Ideas Review','Main idea, details, inference, evidence.','20 min review + 80 min practice + 20 min mistakes'],
+  ['Advanced Math Review','Quadratics, functions, exponentials, rational expressions.','20 min review + 80 min mixed practice + 20 min mistakes','Timed Module Practice','Complete one Reading/Writing module timed.','35 min timed module + 65 min review + 20 min notes'],
+  ['Data + Statistics','Tables, graphs, mean, median, range.','25 min learn + 80 min practice + 15 min review','Timed Module Review','Review mistakes and create weak-topic list.','30 min review + 70 min targeted practice + 20 min notes'],
+  ['Scatterplots + Models','Line of best fit, prediction, correlation.','25 min learn + 80 min practice + 15 min mistakes','Boundaries Hard Practice','Punctuation and sentence separation.','20 min review + 80 min hard practice + 20 min mistakes'],
+  ['Probability + Two-Way Tables','Probability, relative frequency, conditional probability.','25 min learn + 80 min practice + 15 min review','Form, Structure, Sense','Sentence logic and grammar meaning.','25 min learn + 80 min practice + 15 min review'],
+  ['Data Review','Stats, graphs, probability, word problems.','20 min review + 80 min mixed practice + 20 min mistakes','Expression of Ideas Review','Transitions and rhetorical synthesis.','20 min review + 80 min practice + 20 min mistakes'],
+  ['Geometry Basics','Angles, parallel lines, triangles.','25 min learn + 80 min practice + 15 min review','Reading Speed Practice','Timed short passages with accuracy tracking.','20 min strategy + 80 min timed practice + 20 min review'],
+  ['Area + Perimeter','Triangles, rectangles, circles, trapezoids.','25 min learn + 80 min practice + 15 min mistakes','Mixed English Review','All Reading/Writing question types.','20 min review + 80 min mixed practice + 20 min mistakes'],
+  ['Volume + Surface Area','Prisms, cylinders, cones, spheres.','25 min learn + 80 min practice + 15 min review','Grammar Weak Repair','Worst grammar skills.','25 min repair + 75 min practice + 20 min mistakes'],
+  ['Coordinate Geometry','Distance formula and midpoint formula.','25 min learn + 80 min practice + 15 min mistakes','Reading Weak Repair','Worst reading skills.','25 min repair + 75 min practice + 20 min mistakes'],
+  ['Right Triangles','Pythagorean theorem and special triangles.','25 min learn + 80 min practice + 15 min review','Timed R/W Module','Complete one module and review mistakes.','35 min timed + 65 min review + 20 min notes'],
+  ['Trigonometry','Sine, cosine, tangent, SOH-CAH-TOA.','25 min learn + 80 min practice + 15 min mistakes','Hard Question Practice','Medium/hard Reading/Writing questions.','20 min review + 80 min hard practice + 20 min mistakes'],
+  ['Circles','Circumference, area, arcs, sectors.','25 min learn + 80 min practice + 15 min review','Grammar Final Review','Grammar and punctuation mixed.','20 min review + 80 min practice + 20 min mistakes'],
+  ['Circle Equations','Center-radius form and graphing circles.','25 min learn + 80 min practice + 15 min mistakes','Craft + Structure Final','Words, purpose, structure, cross-text.','20 min review + 80 min practice + 20 min mistakes'],
+  ['Geometry Review','Angles, triangles, circles, trig, volume.','20 min review + 80 min mixed practice + 20 min mistakes','Information + Ideas Final','Main idea, details, inference, evidence.','20 min review + 80 min practice + 20 min mistakes'],
+  ['Desmos Skills','Systems, quadratics, intersections, graph solving.','25 min calculator tricks + 80 min practice + 15 min notes','Full R/W Timed Practice','Full Reading/Writing timed practice and review.','35 min timed + 65 min review + 20 min notes'],
+  ['Full Timed Math Practice','Take a full Math section and review mistakes.','70 min timed test + 50 min review','English Weak Review','Practice weakest 3 English skills.','30 min review + 70 min practice + 20 min notes'],
+  ['Final Weakness Review','Redo missed questions and review formulas.','30 min formula review + 70 min weak practice + 20 min final notes','Final R/W Review','Redo missed questions and review grammar rules.','30 min grammar review + 70 min weak practice + 20 min final notes']
+].map((row, i) => {
+  const d = new Date(START_DATE); d.setDate(START_DATE.getDate()+i);
+  return { day:i+1, date: d.toISOString().slice(0,10), mathTopic: row[0], mathSub: row[1], mathPlan: row[2], engTopic: row[3], engSub: row[4], engPlan: row[5] };
+});
+
+const mathSkills = [
+  'Fractions, decimals, percents','Ratios, rates, proportions','Units and conversions','Exponents and roots','Linear equations','Linear word problems','Slope','Graphing lines','Writing line equations','Linear inequalities','Systems of equations','Systems word problems','No solution / infinite solutions','Functions','Function graphs','Rearranging formulas','Factoring','Quadratics','Quadratic formula','Vertex form','Completing the square','Quadratic word problems','Exponential functions','Polynomials','Rational expressions','Radicals','Absolute value','Tables and graphs','Scatterplots','Mean, median, range','Standard deviation basics','Probability','Two-way tables','Angles','Triangles','Area and perimeter','Volume and surface area','Coordinate geometry','Right triangles','Special right triangles','Trigonometry','Circles','Circle equations','Desmos/calculator skills'
+];
+
+const englishSkills = [
+  'Main idea','Details','Inferences','Command of evidence','Graph/table evidence','Words in context','Text structure','Author purpose','Cross-text connections','Transitions','Rhetorical synthesis','Boundaries','Commas','Semicolons','Colons','Dashes','Apostrophes','Subject-verb agreement','Pronoun agreement','Verb tense','Modifiers','Parallel structure','Sentence fragments','Run-ons','Combining sentences','Concision','Logical placement','Standard English conventions','Expression of ideas','Hard reading passages','Timed reading/writing modules'
+];
+
+const mockDates = [
+  ['Mock Test 1','2026-07-01'], ['Mock Test 2','2026-07-08'], ['Mock Test 3','2026-07-15'], ['Mock Test 4','2026-07-22'], ['Mock Test 5','2026-07-29'], ['Mock Test 6','2026-08-05'], ['Final Review Test','2026-08-08']
+];
+
+let state = loadState();
+let activeTab = 'dashboard';
+
+function defaultState(){
+  return {
+    days: Object.fromEntries(plan.map(d => [d.day, { mathDone:false, engDone:false, mistakesReviewed:false, flashcards:false, status:'Not Started', notes:'' }])),
+    mathSkills: Object.fromEntries(mathSkills.map(s => [s, 'Not Started'])),
+    englishSkills: Object.fromEntries(englishSkills.map(s => [s, 'Not Started'])),
+    mocks: Object.fromEntries(mockDates.map(([name,date], i) => [i, { name, date, math:'', english:'', total:'', goal:'', wentWell:'', improve:'', weakSkills:'', nextFocus:'', reviewed:false }])),
+    mistakes: []
+  };
+}
+
+function loadState(){
+  const base = defaultState();
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    if (!saved) return base;
+    return {
+      ...base,
+      ...saved,
+      days: {...base.days, ...(saved.days || {})},
+      mathSkills: {...base.mathSkills, ...(saved.mathSkills || {})},
+      englishSkills: {...base.englishSkills, ...(saved.englishSkills || {})},
+      mocks: {...base.mocks, ...(saved.mocks || {})},
+      mistakes: saved.mistakes || []
+    };
+  } catch { return base; }
+}
+function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); render(); }
+function byId(id){ return document.getElementById(id); }
+function pct(n,d){ return d ? Math.round((n/d)*100) : 0; }
+function dateLabel(iso){ return new Date(iso + 'T00:00:00').toLocaleDateString(undefined,{weekday:'short', month:'short', day:'numeric'}); }
+function cleanStatus(status){ return STATUS_CLASS[status] || STATUS_CLASS['Not Started']; }
+function statusSelect(value, onchange){ return `<select onchange="${onchange}">${STATUS_OPTIONS.map(o=>`<option ${o===value?'selected':''}>${o}</option>`).join('')}</select>`; }
+function escapeHtml(str=''){ return String(str).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
+
+function calcStats(){
+  const dayVals = Object.values(state.days);
+  const mathDone = dayVals.filter(d=>d.mathDone).length;
+  const engDone = dayVals.filter(d=>d.engDone).length;
+  const checksDone = dayVals.reduce((a,d)=> a + (d.mathDone?1:0) + (d.engDone?1:0) + (d.mistakesReviewed?1:0) + (d.flashcards?1:0), 0);
+  const totalChecks = plan.length * 4;
+  const skillStatuses = [...Object.values(state.mathSkills), ...Object.values(state.englishSkills)];
+  const mastered = skillStatuses.filter(s=>s==='Mastered').length;
+  const review = skillStatuses.filter(s=>s==='Needs Review').length;
+  const notStarted = skillStatuses.filter(s=>s==='Not Started').length;
+  const completedDays = dayVals.filter(d=>d.mathDone && d.engDone).length;
+  return { mathDone, engDone, checksDone, totalChecks, mastered, review, notStarted, completedDays, overall:pct(checksDone,totalChecks), mathPct:pct(mathDone,45), engPct:pct(engDone,45), masteryPct:pct(mastered, skillStatuses.length) };
+}
+
+function navInit(){
+  byId('nav').innerHTML = tabs.map(([id,icon,label]) => `<button class="${id===activeTab?'active':''}" onclick="showTab('${id}')"><span>${icon}</span>${label}</button>`).join('');
+}
+function showTab(id){ activeTab = id; render(); }
+
+function render(){
+  navInit();
+  tabs.forEach(([id,,label,sub]) => byId(id).classList.toggle('active', id===activeTab));
+  const tab = tabs.find(t=>t[0]===activeTab);
+  byId('pageTitle').textContent = tab[2];
+  byId('pageSub').textContent = tab[3];
+  updateCountdown();
+  renderDashboard(); renderDaily(); renderCalendar(); renderSkills('math'); renderSkills('english'); renderMocks(); renderMistakes();
+}
+
+function updateCountdown(){
+  const today = new Date(); today.setHours(0,0,0,0);
+  const start = new Date(START_DATE); start.setHours(0,0,0,0);
+  const end = new Date(END_DATE); end.setHours(0,0,0,0);
+  let text = '';
+  if (today < start) text = `${Math.ceil((start-today)/86400000)} days until start`;
+  else if (today > end) text = 'Study plan ended';
+  else text = `${Math.ceil((end-today)/86400000)+1} days left`;
+  byId('countdownPill').textContent = `⏳ ${text}`;
+}
+
+function progress(label, value){
+  return `<div class="progress-wrap"><div class="progress-top"><span>${label}</span><span>${value}%</span></div><div class="progress-track"><div class="progress-fill" style="width:${value}%"></div></div></div>`;
+}
+
+function renderDashboard(){
+  const s = calcStats();
+  const todayPlan = getTodayPlan();
+  const nextMock = getNextMock();
+  const html = `
+    <div class="grid grid-4">
+      ${statCard('Overall Progress', `${s.overall}%`, `${s.checksDone}/${s.totalChecks} daily checks done`, s.overall)}
+      ${statCard('Math Progress', `${s.mathPct}%`, `${s.mathDone}/45 math days done`, s.mathPct)}
+      ${statCard('English Progress', `${s.engPct}%`, `${s.engDone}/45 English days done`, s.engPct)}
+      ${statCard('Skill Mastery', `${s.masteryPct}%`, `${s.mastered}/${mathSkills.length + englishSkills.length} skills mastered`, s.masteryPct)}
+    </div>
+
+    <div class="grid grid-3" style="margin-top:16px;">
+      <div class="card stat-card"><div><div class="stat-label">Completed Days</div><div class="stat-value">${s.completedDays}</div><div class="stat-sub">Days with Math + English both completed</div></div></div>
+      <div class="card stat-card"><div><div class="stat-label">Need Review</div><div class="stat-value">${s.review}</div><div class="stat-sub">Skills marked Needs Review</div></div></div>
+      <div class="card stat-card"><div><div class="stat-label">Not Started</div><div class="stat-value">${s.notStarted}</div><div class="stat-sub">Skills not started yet</div></div></div>
+    </div>
+
+    <div class="grid grid-2" style="margin-top:16px;">
+      <div class="card">
+        <div class="section-head" style="margin-top:0;"><div><h3>Today’s Study</h3><p>${todayPlan ? `Day ${todayPlan.day} • ${dateLabel(todayPlan.date)}` : 'Outside study calendar'}</p></div>${todayPlan ? `<button class="btn small" onclick="openDay(${todayPlan.day})">Open Day</button>` : ''}</div>
+        ${todayPlan ? daySummary(todayPlan) : '<p class="empty">Your 45-day plan starts June 25, 2026 and ends August 8, 2026.</p>'}
+      </div>
+      <div class="card">
+        <div class="section-head" style="margin-top:0;"><div><h3>Next Mock Test</h3><p>${nextMock ? `${nextMock.name} • ${dateLabel(nextMock.date)}` : 'All mocks finished'}</p></div><button class="btn small" onclick="showTab('mocks')">Scores</button></div>
+        ${nextMock ? `<div class="grid grid-2"><div class="topic-card"><h4>Score boxes</h4><p>Math: ${state.mocks[nextMock.index].math || '—'}</p><p>English: ${state.mocks[nextMock.index].english || '—'}</p><p>Total: ${state.mocks[nextMock.index].total || '—'}</p></div><div class="topic-card"><h4>Improve note</h4><p>${escapeHtml(state.mocks[nextMock.index].improve || 'Write what you need to improve after the mock.')}</p></div></div>` : '<p class="empty">No upcoming mock tests.</p>'}
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+      <div class="section-head" style="margin-top:0;"><div><h3>Fast Actions</h3><p>Use these after practice sessions.</p></div></div>
+      <div class="filters">
+        <button class="btn" onclick="showTab('daily')">Go to Daily Plan</button>
+        <button class="btn secondary" onclick="showTab('mistakes')">Add Mistake</button>
+        <button class="btn secondary" onclick="exportProgress()">Export Progress as Text</button>
+        <button class="btn danger" onclick="resetProgress()">Reset All</button>
+      </div>
+    </div>
+  `;
+  byId('dashboard').innerHTML = html;
+}
+function statCard(label, value, sub, percent){
+  return `<div class="card stat-card"><div><div class="stat-label">${label}</div><div class="stat-value">${value}</div><div class="stat-sub">${sub}</div></div>${progress('Progress', percent)}</div>`;
+}
+function getTodayPlan(){
+  const today = new Date(); today.setHours(0,0,0,0);
+  return plan.find(d => new Date(d.date+'T00:00:00').getTime() === today.getTime()) || null;
+}
+function getNextMock(){
+  const today = new Date(); today.setHours(0,0,0,0);
+  const arr = mockDates.map(([name,date], index)=>({name,date,index}));
+  return arr.find(m => new Date(m.date+'T00:00:00') >= today) || arr[arr.length-1];
+}
+function daySummary(d){
+  return `<div class="grid grid-2"><div class="topic-card"><h4>Math: ${d.mathTopic}</h4><p>${d.mathSub}</p><p><strong>Plan:</strong> ${d.mathPlan}</p></div><div class="topic-card"><h4>English: ${d.engTopic}</h4><p>${d.engSub}</p><p><strong>Plan:</strong> ${d.engPlan}</p></div></div>`;
+}
+
+function renderDaily(){
+  byId('daily').innerHTML = `
+    <div class="filters">
+      <input id="dailySearch" placeholder="Search days/topics..." oninput="renderDailyList()" />
+      <select id="dailyFilter" onchange="renderDailyList()"><option value="all">All statuses</option>${STATUS_OPTIONS.map(s=>`<option>${s}</option>`).join('')}</select>
+      <button class="btn secondary" onclick="markTodayDone()">Mark Today Done</button>
+    </div>
+    <div id="dailyList" class="grid"></div>
+  `;
+  renderDailyList();
+}
+function renderDailyList(){
+  const list = byId('dailyList'); if (!list) return;
+  const q = (byId('dailySearch')?.value || '').toLowerCase();
+  const f = byId('dailyFilter')?.value || 'all';
+  const todayIso = new Date().toISOString().slice(0,10);
+  const filtered = plan.filter(d => {
+    const text = `${d.day} ${d.date} ${d.mathTopic} ${d.mathSub} ${d.engTopic} ${d.engSub}`.toLowerCase();
+    const matchQ = !q || text.includes(q);
+    const matchF = f === 'all' || state.days[d.day].status === f;
+    return matchQ && matchF;
+  });
+  list.innerHTML = filtered.map(d => dailyCard(d, d.date === todayIso)).join('') || '<div class="card empty">No days found.</div>';
+}
+function dailyCard(d, isToday=false){
+  const st = state.days[d.day];
+  return `<div class="card daily-card ${isToday?'today-highlight':''}">
+    <div class="day-box"><div><div class="date">${dateLabel(d.date)}</div><div class="day-number">Day ${d.day}</div></div><span class="badge ${cleanStatus(st.status)}">${st.status}</span></div>
+    <div class="topic-card"><h4>🧮 Math: ${d.mathTopic}</h4><p>${d.mathSub}</p><p><strong>2 hours:</strong> ${d.mathPlan}</p></div>
+    <div class="topic-card"><h4>📖 English: ${d.engTopic}</h4><p>${d.engSub}</p><p><strong>2 hours:</strong> ${d.engPlan}</p></div>
+    <div class="topic-card">
+      <div class="checklist">
+        ${checkbox(`day-${d.day}-math`, st.mathDone, `updateDay(${d.day}, 'mathDone', this.checked)`, 'Math completed')}
+        ${checkbox(`day-${d.day}-eng`, st.engDone, `updateDay(${d.day}, 'engDone', this.checked)`, 'English completed')}
+        ${checkbox(`day-${d.day}-mistakes`, st.mistakesReviewed, `updateDay(${d.day}, 'mistakesReviewed', this.checked)`, 'Mistakes reviewed')}
+        ${checkbox(`day-${d.day}-flash`, st.flashcards, `updateDay(${d.day}, 'flashcards', this.checked)`, 'Formulas/flashcards reviewed')}
+      </div>
+      <div style="margin-top:10px;">${statusSelect(st.status, `updateDay(${d.day}, 'status', this.value)`)}</div>
+      <textarea style="margin-top:10px;" placeholder="Daily notes..." oninput="updateDay(${d.day}, 'notes', this.value, false)" onchange="save()">${escapeHtml(st.notes)}</textarea>
+    </div>
+  </div>`;
+}
+function checkbox(id, checked, onchange, label){ return `<label class="check"><input id="${id}" type="checkbox" ${checked?'checked':''} onchange="${onchange}"> ${label}</label>`; }
+function updateDay(day, key, value, doSave=true){ state.days[day][key] = value; if (doSave) save(); else localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+function markTodayDone(){
+  const today = getTodayPlan();
+  if (!today) return alert('Today is outside the June 25 to August 8 plan.');
+  state.days[today.day].mathDone = true; state.days[today.day].engDone = true; state.days[today.day].mistakesReviewed = true; state.days[today.day].flashcards = true; state.days[today.day].status = 'Mastered'; save();
+}
+
+function renderCalendar(){
+  const html = `<div class="calendar-grid">${plan.map(d=>calCard(d)).join('')}</div>`;
+  byId('calendar').innerHTML = html;
+}
+function calCard(d){
+  const st = state.days[d.day];
+  const todayIso = new Date().toISOString().slice(0,10);
+  let status = st.status;
+  let cls = cleanStatus(status);
+  if (d.date < todayIso && !(st.mathDone || st.engDone) && new Date() <= END_DATE) { status = 'Missed'; cls = 'status-missed'; }
+  return `<div class="cal-card ${d.date===todayIso?'today-highlight':''}" onclick="openDay(${d.day})">
+    <div class="cal-date">Day ${d.day}</div><div class="cal-day">${dateLabel(d.date)}</div>
+    <div class="cal-topic"><strong>M:</strong> ${d.mathTopic}<br><strong>E:</strong> ${d.engTopic}</div>
+    <span class="badge ${cls}">${status}</span>
+  </div>`;
+}
+function openDay(day){
+  const d = plan.find(x=>x.day===day);
+  byId('modalTitle').textContent = `Day ${d.day} • ${dateLabel(d.date)}`;
+  byId('modalBody').innerHTML = dailyCard(d);
+  byId('modalBackdrop').classList.add('active');
+}
+function closeModal(){ byId('modalBackdrop').classList.remove('active'); save(); }
+
+function renderSkills(type){
+  const isMath = type === 'math';
+  const skills = isMath ? mathSkills : englishSkills;
+  const skillState = isMath ? state.mathSkills : state.englishSkills;
+  const section = byId(type);
+  const mastered = skills.filter(s=>skillState[s]==='Mastered').length;
+  const needs = skills.filter(s=>skillState[s]==='Needs Review').length;
+  section.innerHTML = `
+    <div class="grid grid-3">
+      ${statCard('Mastered', mastered, `${mastered}/${skills.length} skills mastered`, pct(mastered, skills.length))}
+      ${statCard('Needs Review', needs, `${needs} skills need extra work`, pct(needs, skills.length))}
+      ${statCard('Remaining', skills.length-mastered, `${skills.length-mastered} skills not mastered`, pct(skills.length-mastered, skills.length))}
+    </div>
+    <div class="filters" style="margin-top:16px;">
+      <input id="${type}Search" placeholder="Search ${type} skills..." oninput="renderSkillList('${type}')">
+      <select id="${type}Filter" onchange="renderSkillList('${type}')"><option value="all">All statuses</option>${STATUS_OPTIONS.map(s=>`<option>${s}</option>`).join('')}</select>
+      <button class="btn secondary" onclick="markNeedsReview('${type}')">Show Needs Review</button>
+    </div>
+    <div id="${type}SkillList" class="skill-grid"></div>
+  `;
+  renderSkillList(type);
+}
+function renderSkillList(type){
+  const isMath = type === 'math';
+  const skills = isMath ? mathSkills : englishSkills;
+  const skillState = isMath ? state.mathSkills : state.englishSkills;
+  const q = (byId(`${type}Search`)?.value || '').toLowerCase();
+  const f = byId(`${type}Filter`)?.value || 'all';
+  const filtered = skills.filter(s => (!q || s.toLowerCase().includes(q)) && (f==='all' || skillState[s]===f));
+  byId(`${type}SkillList`).innerHTML = filtered.map(s => `<div class="skill-card"><strong>${s}</strong><span class="badge ${cleanStatus(skillState[s])}">${skillState[s]}</span>${statusSelect(skillState[s], `updateSkill('${type}', '${escapeJs(s)}', this.value)`)}</div>`).join('') || '<div class="card empty">No skills found.</div>';
+}
+function updateSkill(type, skill, value){
+  if (type==='math') state.mathSkills[skill] = value; else state.englishSkills[skill] = value; save();
+}
+function markNeedsReview(type){ const el = byId(`${type}Filter`); if (el) { el.value='Needs Review'; renderSkillList(type); } }
+function escapeJs(str){ return String(str).replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
+
+function renderMocks(){
+  byId('mocks').innerHTML = `<div class="mock-grid">${mockDates.map(([name,date], i)=>mockCard(i)).join('')}</div>`;
+}
+function mockCard(i){
+  const m = state.mocks[i];
+  return `<div class="card mock-card">
+    <div class="day-box"><div><div class="date">${dateLabel(m.date)}</div><div class="day-number">${m.name}</div></div>${checkbox(`mock-${i}-reviewed`, m.reviewed, `updateMock(${i}, 'reviewed', this.checked)`, 'Reviewed mistakes')}</div>
+    <div>
+      <div class="score-grid">
+        ${scoreInput(i,'math','Math score')}
+        ${scoreInput(i,'english','English score')}
+        ${scoreInput(i,'total','Total score')}
+        ${scoreInput(i,'goal','Goal score')}
+      </div>
+      <div class="note-grid">
+        ${noteInput(i,'wentWell','What went well')}
+        ${noteInput(i,'improve','What I need to improve')}
+        ${noteInput(i,'weakSkills','Top 3 weak skills')}
+        ${noteInput(i,'nextFocus','Next week focus')}
+      </div>
+    </div>
+  </div>`;
+}
+function scoreInput(i,key,label){ return `<label><span class="stat-label">${label}</span><input type="number" placeholder="Score" value="${escapeHtml(state.mocks[i][key])}" oninput="updateMock(${i}, '${key}', this.value, false)" onchange="save()"></label>`; }
+function noteInput(i,key,label){ return `<label><span class="stat-label">${label}</span><textarea placeholder="${label}..." oninput="updateMock(${i}, '${key}', this.value, false)" onchange="save()">${escapeHtml(state.mocks[i][key])}</textarea></label>`; }
+function updateMock(i,key,value, doSave=true){ state.mocks[i][key] = value; if (doSave) save(); else localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+
+function renderMistakes(){
+  byId('mistakes').innerHTML = `
+    <div class="filters">
+      <button class="btn" onclick="addMistake()">Add Mistake</button>
+      <button class="btn secondary" onclick="clearCompletedMistakes()">Clear Completed</button>
+      <button class="btn secondary" onclick="exportProgress()">Export Progress as Text</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Date</th><th>Section</th><th>Topic</th><th>Question Type</th><th>Why I Missed It</th><th>Correct Method</th><th>Review?</th><th>Status</th><th></th></tr></thead>
+        <tbody>${state.mistakes.map((m,i)=>mistakeRow(m,i)).join('') || '<tr><td colspan="9" class="empty">No mistakes yet. Add one after practice.</td></tr>'}</tbody>
+      </table>
+    </div>
+  `;
+}
+function mistakeRow(m,i){
+  return `<tr>
+    <td><input type="date" value="${escapeHtml(m.date)}" onchange="updateMistake(${i}, 'date', this.value)"></td>
+    <td><select onchange="updateMistake(${i}, 'section', this.value)"><option ${m.section==='Math'?'selected':''}>Math</option><option ${m.section==='English'?'selected':''}>English</option></select></td>
+    <td><input value="${escapeHtml(m.topic)}" placeholder="Topic" onchange="updateMistake(${i}, 'topic', this.value)"></td>
+    <td><input value="${escapeHtml(m.type)}" placeholder="Type" onchange="updateMistake(${i}, 'type', this.value)"></td>
+    <td><textarea onchange="updateMistake(${i}, 'why', this.value)">${escapeHtml(m.why)}</textarea></td>
+    <td><textarea onchange="updateMistake(${i}, 'method', this.value)">${escapeHtml(m.method)}</textarea></td>
+    <td><select onchange="updateMistake(${i}, 'review', this.value)"><option ${m.review==='Yes'?'selected':''}>Yes</option><option ${m.review==='No'?'selected':''}>No</option></select></td>
+    <td><select onchange="updateMistake(${i}, 'status', this.value)"><option ${m.status==='Open'?'selected':''}>Open</option><option ${m.status==='Fixed'?'selected':''}>Fixed</option></select></td>
+    <td><button class="btn danger small" onclick="deleteMistake(${i})">Delete</button></td>
+  </tr>`;
+}
+function addMistake(){ state.mistakes.unshift({ date:new Date().toISOString().slice(0,10), section:'Math', topic:'', type:'', why:'', method:'', review:'Yes', status:'Open' }); save(); }
+function updateMistake(i,key,value){ state.mistakes[i][key] = value; save(); }
+function deleteMistake(i){ state.mistakes.splice(i,1); save(); }
+function clearCompletedMistakes(){ state.mistakes = state.mistakes.filter(m=>m.status !== 'Fixed'); save(); }
+
+function exportProgress(){
+  const s = calcStats();
+  const lines = [];
+  lines.push('SAT 45-Day Tracker Progress');
+  lines.push(`Overall: ${s.overall}%`);
+  lines.push(`Math: ${s.mathDone}/45 days`);
+  lines.push(`English: ${s.engDone}/45 days`);
+  lines.push(`Skills mastered: ${s.mastered}/${mathSkills.length + englishSkills.length}`);
+  lines.push('');
+  lines.push('Mock Scores:');
+  Object.values(state.mocks).forEach(m => lines.push(`${m.name} (${m.date}) - Math: ${m.math || '-'}, English: ${m.english || '-'}, Total: ${m.total || '-'}, Improve: ${m.improve || '-'}`));
+  lines.push('');
+  lines.push('Open Mistakes:');
+  state.mistakes.filter(m=>m.status!=='Fixed').forEach(m => lines.push(`${m.date} | ${m.section} | ${m.topic} | Why: ${m.why} | Fix: ${m.method}`));
+  navigator.clipboard?.writeText(lines.join('\n')).then(()=> alert('Progress copied to clipboard.')).catch(()=> alert(lines.join('\n')));
+}
+function resetProgress(){
+  if (confirm('Reset all progress? This cannot be undone.')) { state = defaultState(); localStorage.removeItem(STORAGE_KEY); render(); }
+}
+
+window.addEventListener('click', (e)=> { if (e.target === byId('modalBackdrop')) closeModal(); });
+render();
+</script>
+</body>
+</html>
